@@ -23,18 +23,17 @@ app.listen(PORT, () => {
     console.log(`Double Submit Cookies Pattern Demo Started On ${PORT}`);
 });
 
-// JS Object to store Session IDs with CSRF tokens
-const SESSION_IDS = {};
-
 // Login Page Load
 app.get('/', (req, res) => {
 
     const sessionID = req.cookies['session-id'];
-    if (sessionID && SESSION_IDS[sessionID]) {
-        console.log("Login: Valid Session Found !");
+    const cookieToken = req.cookies['csrf-token'];
+
+    if (sessionID && cookieToken) {
+        console.log("Login: Some Session ID and CSRF Token Found !");
         res.sendFile('views/form.html', {root: __dirname});
     } else {
-        console.log("Login: No Valid Session Found !");
+        console.log("Login: No Session ID and CSRF Token Found !");
         res.sendFile('views/login.html', {root: __dirname});
     }
 });
@@ -45,6 +44,9 @@ app.post('/home', (req, res) => {
     const username = req.body.inputUsername;
     const password = req.body.inputPassword;
 
+    const sessionID = req.cookies['session-id'];
+    const cookieToken = req.cookies['csrf-token'];
+
     if (username === 'root' && password === 'root') {
 
         console.log("Home: Logged with valid credentials");
@@ -53,10 +55,14 @@ app.post('/home', (req, res) => {
         const SESSION_ID = uuidv1();
         const CSRF_TOKEN = uuidv4();
 
-        console.log(`Generated Session ID: ${SESSION_ID}, CSRF Token: ${CSRF_TOKEN}`);
+        if (!sessionID && !cookieToken) {
+            console.log(`Generated Session ID: ${SESSION_ID}, CSRF Token: ${CSRF_TOKEN}`);
+            // Setting Cookie on Header
+            res.setHeader('Set-Cookie', [`session-id=${SESSION_ID}`, `time=${Date.now()}`, `csrf-token=${CSRF_TOKEN}`]);
+        } else {
+            console.log('POST /home Some Session ID and CSRF Token Found')
+        }
 
-        // Setting Cookie on Header
-        res.setHeader('Set-Cookie', [`session-id=${SESSION_ID}`, `time=${Date.now()}`, `csrf-token=${CSRF_TOKEN}`]);
 
         res.sendFile('views/form.html', {root: __dirname});
     } else {
@@ -104,11 +110,13 @@ app.post('/logout', (req, res) => {
 app.get('/home', (req, res) => {
 
     const sessionID = req.cookies['session-id'];
-    if (sessionID && SESSION_IDS[sessionID]) {
-        console.log("GET /home: Valid Session Found !");
+    const cookieToken = req.cookies['csrf-token'];
+
+    if (sessionID && cookieToken) {
+        console.log("GET /home: Some Session ID and CSRF Token Found !");
         res.sendFile('views/form.html', {root: __dirname});
     } else {
-        console.log("GET /home: No Valid Session Found !");
+        console.log("GET /home: No Session ID and CSRF Token Found !");
         res.sendFile('views/login.html', {root: __dirname});
     }
 
@@ -121,5 +129,5 @@ app.get('/logout', (req, res) => {
 
 // respond with "hello world" when a GET request is test route
 app.get('/health', function (req, res) {
-    res.send('Welcome to Synchronize Token Pattern Demo !')
+    res.send('Welcome to Double Submit Cookies Pattern Demo !')
 });
