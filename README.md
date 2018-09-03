@@ -21,7 +21,7 @@ Clone this repository **Use master branch !**
 > **Steps:**
 
 > - Run `npm install`.
-> - Navigate to `synchronizer-token-pattern ` directory and run `node index.js`.
+> - Navigate to `double-submit-cookies-pattern ` directory and run `node index.js`.
 > - The app runs on port **3001**.
 > - Open a web browser and navigate to http://localhost:3001/  
 > - User username **root** and password **root** to log in.
